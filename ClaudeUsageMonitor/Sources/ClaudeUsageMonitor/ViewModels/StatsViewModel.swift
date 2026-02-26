@@ -6,6 +6,7 @@ final class StatsViewModel: ObservableObject {
     // MARK: - Usage / Rate Limit
     @Published var usageData: UsageData?
     @Published var lastUpdated: Date?
+    @Published var isRefreshing: Bool = false
 
     // MARK: - Computed
     var fiveHourBucket: UsageBucket? { usageData?.five_hour }
@@ -35,6 +36,9 @@ final class StatsViewModel: ObservableObject {
     }
 
     func refreshRateLimit() {
-        rateLimitService?.fetch()
+        isRefreshing = true
+        rateLimitService?.fetch { [weak self] in
+            self?.isRefreshing = false
+        }
     }
 }

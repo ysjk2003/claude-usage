@@ -85,6 +85,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 if event.window == self.statusItem.button?.window {
                     return event
                 }
+                if event.window == self.popover.contentViewController?.view.window {
+                    return event
+                }
                 self.closePopover()
             }
             return event

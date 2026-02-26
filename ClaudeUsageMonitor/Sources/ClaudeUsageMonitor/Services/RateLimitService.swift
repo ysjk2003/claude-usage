@@ -38,8 +38,11 @@ final class RateLimitService {
         onUpdate = nil
     }
 
-    func fetch() {
-        guard !isFetching else { return }
+    func fetch(completion: (() -> Void)? = nil) {
+        guard !isFetching else {
+            completion?()
+            return
+        }
         isFetching = true
 
         Task { [weak self] in
@@ -50,6 +53,7 @@ final class RateLimitService {
                 self.saveCache(usage: usage)
                 self.onUpdate?(usage)
             }
+            completion?()
         }
     }
 

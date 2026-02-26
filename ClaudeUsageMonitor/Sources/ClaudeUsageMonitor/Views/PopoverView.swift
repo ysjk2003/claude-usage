@@ -19,6 +19,19 @@ struct PopoverView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                Button(action: { viewModel.refreshRateLimit() }) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.caption)
+                        .rotationEffect(.degrees(viewModel.isRefreshing ? 360 : 0))
+                        .animation(
+                            viewModel.isRefreshing
+                                ? .linear(duration: 0.8).repeatForever(autoreverses: false)
+                                : .default,
+                            value: viewModel.isRefreshing
+                        )
+                }
+                .buttonStyle(.borderless)
+                .disabled(viewModel.isRefreshing)
             }
 
             Divider()
