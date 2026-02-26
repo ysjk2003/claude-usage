@@ -2,7 +2,6 @@ import SwiftUI
 
 struct PopoverView: View {
     @ObservedObject var viewModel: StatsViewModel
-    var onOpenDashboard: () -> Void
     var onQuit: () -> Void
 
     var body: some View {
@@ -27,121 +26,22 @@ struct PopoverView: View {
             // Usage / Rate Limit
             if viewModel.usageData != nil {
                 usageSection()
-                Divider()
-            }
-
-            if let stats = viewModel.statsData {
-                // Today's Stats
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Today")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.secondary)
-
-                    if let today = viewModel.todayActivity {
-                        HStack(spacing: 16) {
-                            miniStat(icon: "message.fill", label: "Messages", value: "\(today.messageCount)")
-                            miniStat(icon: "rectangle.stack.fill", label: "Sessions", value: "\(today.sessionCount)")
-                            miniStat(icon: "wrench.fill", label: "Tools", value: "\(today.toolCallCount)")
-                        }
-                    } else {
-                        Text("No activity yet today")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if viewModel.todayTokens > 0 {
-                        HStack {
-                            Image(systemName: "cpu")
-                                .foregroundStyle(.orange)
-                                .font(.caption)
-                            Text("Tokens: \(TokenFormatter.format(viewModel.todayTokens))")
-                                .font(.caption)
-                        }
-                    }
-                }
-
-                Divider()
-
-                // Overall Stats
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("All Time")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.secondary)
-
-                    HStack(spacing: 16) {
-                        miniStat(icon: "rectangle.stack.fill", label: "Sessions", value: "\(stats.totalSessions)")
-                        miniStat(icon: "message.fill", label: "Messages", value: formatNumber(stats.totalMessages))
-                    }
-
-                    HStack {
-                        Image(systemName: "cpu")
-                            .foregroundStyle(.orange)
-                            .font(.caption)
-                        Text("Total Tokens: \(TokenFormatter.format(viewModel.totalTokens))")
-                            .font(.caption)
-                    }
-
-                    HStack {
-                        Image(systemName: "timer")
-                            .foregroundStyle(.green)
-                            .font(.caption)
-                        Text("Longest Session: \(stats.longestSession.durationFormatted) (\(stats.longestSession.messageCount) msgs)")
-                            .font(.caption)
-                    }
-                }
-
-                Divider()
-
-                // Model breakdown
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Models")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.secondary)
-
-                    ForEach(viewModel.modelBreakdownItems) { item in
-                        HStack {
-                            Circle()
-                                .fill(colorForModel(item.modelName))
-                                .frame(width: 8, height: 8)
-                            Text(item.displayName)
-                                .font(.caption)
-                            Spacer()
-                            Text(TokenFormatter.format(item.totalTokens))
-                                .font(.caption.monospacedDigit())
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            } else if let error = viewModel.errorMessage {
-                VStack {
-                    Image(systemName: "exclamationmark.triangle")
-                        .foregroundStyle(.yellow)
-                    Text(error)
+            } else {
+                VStack(spacing: 8) {
+                    ProgressView()
+                    Text("Loading usage data...")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
+                .padding(.vertical, 12)
             }
 
             Divider()
 
             // Actions
             HStack {
-                Button(action: onOpenDashboard) {
-                    Label("Open Dashboard", systemImage: "macwindow")
-                        .font(.caption)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.purple)
-
                 Spacer()
-
                 Button(action: onQuit) {
                     Text("Quit")
                         .font(.caption)
@@ -150,7 +50,7 @@ struct PopoverView: View {
             }
         }
         .padding(16)
-        .frame(width: 320)
+        .frame(width: 300)
     }
 
     private func usageSection() -> some View {
@@ -206,34 +106,5 @@ struct PopoverView: View {
             }
             .frame(height: 6)
         }
-    }
-
-    private func miniStat(icon: String, label: String, value: String) -> some View {
-        VStack(spacing: 2) {
-            Image(systemName: icon)
-                .foregroundStyle(.purple)
-                .font(.caption)
-            Text(value)
-                .font(.system(.caption, design: .rounded).weight(.semibold).monospacedDigit())
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private func formatNumber(_ n: Int) -> String {
-        if n >= 1000 {
-            return String(format: "%.1fK", Double(n) / 1000)
-        }
-        return "\(n)"
-    }
-
-    private func colorForModel(_ model: String) -> Color {
-        if model.contains("opus-4-6") { return .purple }
-        if model.contains("opus-4-5") { return .indigo }
-        if model.contains("sonnet") { return .blue }
-        if model.contains("haiku") { return .mint }
-        return .gray
     }
 }

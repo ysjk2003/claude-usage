@@ -1,76 +1,5 @@
 import Foundation
 
-// MARK: - Root
-struct StatsData: Codable {
-    let version: Int
-    let lastComputedDate: String
-    let dailyActivity: [DailyActivity]
-    let dailyModelTokens: [DailyModelTokens]
-    let modelUsage: [String: ModelUsage]
-    let totalSessions: Int
-    let totalMessages: Int
-    let longestSession: LongestSession
-    let firstSessionDate: String
-    let hourCounts: [String: Int]
-    let totalSpeculationTimeSavedMs: Int?
-}
-
-// MARK: - Daily Activity
-struct DailyActivity: Codable, Identifiable {
-    let date: String
-    let messageCount: Int
-    let sessionCount: Int
-    let toolCallCount: Int
-
-    var id: String { date }
-
-    var parsedDate: Date? {
-        Self.dateFormatter.date(from: date)
-    }
-
-    private static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        f.locale = Locale(identifier: "en_US_POSIX")
-        return f
-    }()
-}
-
-// MARK: - Daily Model Tokens
-struct DailyModelTokens: Codable, Identifiable {
-    let date: String
-    let tokensByModel: [String: Int]
-
-    var id: String { date }
-
-    var parsedDate: Date? {
-        Self.dateFormatter.date(from: date)
-    }
-
-    private static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        f.locale = Locale(identifier: "en_US_POSIX")
-        return f
-    }()
-}
-
-// MARK: - Model Usage
-struct ModelUsage: Codable {
-    let inputTokens: Int
-    let outputTokens: Int
-    let cacheReadInputTokens: Int
-    let cacheCreationInputTokens: Int
-    let webSearchRequests: Int?
-    let costUSD: Double?
-    let contextWindow: Int?
-    let maxOutputTokens: Int?
-
-    var totalTokens: Int {
-        inputTokens + outputTokens + cacheReadInputTokens + cacheCreationInputTokens
-    }
-}
-
 // MARK: - Rate Limit Usage (from OAuth API)
 struct UsageBucket: Codable {
     let utilization: Double   // percentage 0-100
@@ -113,22 +42,4 @@ struct UsageData: Codable {
 struct UsageCache: Codable {
     var usage: UsageData
     var lastChecked: Date
-}
-
-// MARK: - Longest Session
-struct LongestSession: Codable {
-    let sessionId: String
-    let duration: Int // milliseconds
-    let messageCount: Int
-    let timestamp: String
-
-    var durationFormatted: String {
-        let totalSeconds = duration / 1000
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        }
-        return "\(minutes)m"
-    }
 }
