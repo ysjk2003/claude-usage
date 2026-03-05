@@ -23,5 +23,8 @@ cp "$BUILD_DIR/$APP_NAME" "$MACOS/$APP_NAME"
 # Copy Info.plist
 cp Resources/Info.plist "$CONTENTS/Info.plist"
 
-echo "==> Done! App bundle at: $APP_BUNDLE"
-echo "    Run with: open $APP_BUNDLE"
+echo "==> Installing to /Applications..."
+cp -R "$APP_BUNDLE" "/Applications/$APP_NAME.app"
+
+echo "==> Done! Installed at /Applications/$APP_NAME.app"
+echo "    Run with: open /Applications/$APP_NAME.app"
